@@ -23,6 +23,8 @@ export default function App() {
     rif: "",
   });
   const [touched, setTouched] = useState({});
+  const [enviado, setEnviado] = useState(false);
+  const [enviando, setEnviando] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -36,10 +38,22 @@ export default function App() {
   const showError = (field) => touched[field] && !isValid(field);
   const formValid = Object.keys(FIELD_VALIDATORS).every(isValid);
 
-  const handleContinuar = (e) => {
+  const handleContinuar = async (e) => {
     e.preventDefault();
-    if (!formValid) return;
-    alert("Formulario enviado correctamente.");
+    if (!formValid || enviando) return;
+    setEnviando(true);
+    const body = new URLSearchParams({
+      "form-name": "solicitud-vehicular",
+      ...form,
+    });
+    try {
+      await fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: body.toString() });
+      setEnviado(true);
+    } catch {
+      alert("Error al enviar. Intente nuevamente.");
+    } finally {
+      setEnviando(false);
+    }
   };
 
   const inputStyle = (field) => ({
@@ -74,7 +88,14 @@ export default function App() {
             Datos del Cliente
           </div>
 
-          <form onSubmit={handleContinuar} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+          {enviado ? (
+            <div style={{ textAlign: "center", padding: "32px 0" }}>
+              <p style={{ fontSize: "22px", color: "#16a34a", fontWeight: "700", marginBottom: "8px" }}>✓ Solicitud enviada</p>
+              <p style={{ fontSize: "14px", color: "#6b7280" }}>Su solicitud de preaprobado fue recibida correctamente.<br />En breve nos comunicaremos con usted.</p>
+            </div>
+          ) : (
+          <form name="solicitud-vehicular" method="POST" data-netlify="true" onSubmit={handleContinuar} style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
+            <input type="hidden" name="form-name" value="solicitud-vehicular" />
 
             <div>
               <label style={{ display: "block", fontSize: "12px", color: "#6b7280", marginBottom: "4px" }}>Apellidos y Nombres</label>
@@ -133,6 +154,7 @@ export default function App() {
             </button>
 
           </form>
+          )}
         </div>
 
       </div>
